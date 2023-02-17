@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  app-books:
+    image: danymsimbanap/app-book:test
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-book.rule=PathPrefix(`/api/book`)"
+      - "traefik.http.routers.app-book.entrypoints=web"
+    depends_on:
+      - db
+    environment:
+      - DB_DRIVER=org.postgresql.ds.PGSimpleDataSource
+      - DB_URL=jdbc:postgresql://db:5432/postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+    expose:
+      - 8080
+
+  app-authors:
+    image: danymsimbanap/app-author:test
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-author.rule=PathPrefix(`/api/author`)"
+      - "traefik.http.routers.app-author.entrypoints=web"
+    depends_on:
+      - db
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+    expose:
+      - 8081
+
+  app-web:
+    image: danymsimbanap/app-web:test
+    depends_on:
+      - traefik
+    ports:
+      - ":8888:8089"
+
+  db:
+    image: postgres:12
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
+
+  traefik:
+    image: "traefik:v2.9"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "9090:80"
+      - "6099:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
