@@ -1,6 +1,6 @@
 @echo off
 git clone https://github.com/dmsimbanap/PruebaParcial
-cd .\cliente-app\
+cd .\PruebaParcial\cliente-app\
 call .\gradlew clean
 call .\gradlew build
 call .\gradlew installDist
